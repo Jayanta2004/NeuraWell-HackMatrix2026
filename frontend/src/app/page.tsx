@@ -111,8 +111,16 @@ export default function Home() {
 
         <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="mx-auto h-full max-w-3xl">
-            {view === "chat" && <ChatInterface onMoodUpdate={handleMoodUpdate} />}
-            {view === "journal" && <JournalMode onMoodUpdate={handleMoodUpdate} />}
+            {view === "chat" && (
+              <ChatInterface
+                onMoodUpdate={handleMoodUpdate}
+                onModeToggle={(m) => setView(m)}
+                currentMode="chat"
+              />
+            )}
+            {view === "journal" && (
+              <JournalMode onMoodUpdate={handleMoodUpdate} />
+            )}
             {view === "trends" && <MoodTrendDashboard />}
             {view === "breathe" && (
               <div className="flex h-full items-center justify-center">

@@ -3,31 +3,31 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #eef6f0;
-  --background-2: #dcece0;
-  --foreground: #123024;
-  --muted: #4d6459;
-  --card: rgba(255, 255, 255, 0.55);
-  --card-border: rgba(255, 255, 255, 0.6);
-  --primary: #0f9d68;
-  --primary-foreground: #f2fbf6;
-  --accent: #6fae8c;
+  --background: #ecfdf5;
+  --background-2: #d1fae5;
+  --foreground: #064e3b;
+  --muted: #047857;
+  --card: rgba(255, 255, 255, 0.7);
+  --card-border: rgba(16, 185, 129, 0.15);
+  --primary: #059669;
+  --primary-foreground: #ffffff;
+  --accent: #34d399;
   --ring: #10b981;
-  --danger: #dc2626;
-  --danger-bg: rgba(220, 38, 38, 0.1);
+  --danger: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.1);
 }
 
 .dark {
-  --background: #0a0e27;
-  --background-2: #121a3d;
-  --foreground: #e7ecf7;
-  --muted: #9aa3c4;
-  --card: rgba(24, 28, 58, 0.55);
-  --card-border: rgba(148, 163, 255, 0.16);
-  --primary: #34d399;
-  --primary-foreground: #06120c;
-  --accent: #818cf8;
-  --ring: #6366f1;
+  --background: #061412;
+  --background-2: #0b1f1c;
+  --foreground: #ecfdf5;
+  --muted: #6ee7b7;
+  --card: rgba(6, 78, 59, 0.25);
+  --card-border: rgba(16, 185, 129, 0.15);
+  --primary: #10b981;
+  --primary-foreground: #042f2e;
+  --accent: #34d399;
+  --ring: #34d399;
   --danger: #f87171;
   --danger-bg: rgba(248, 113, 113, 0.15);
 }

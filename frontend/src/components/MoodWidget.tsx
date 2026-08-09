@@ -11,9 +11,9 @@ interface MoodWidgetProps {
 export function MoodWidget({ mood, severity }: MoodWidgetProps) {
   if (!mood || severity === null) {
     return (
-      <div className="glass flex items-center gap-2 rounded-full px-4 py-1.5 text-xs text-muted">
-        <span className="h-2 w-2 rounded-full bg-current opacity-50" />
-        No mood yet
+      <div className="glass flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs text-muted border border-emerald-500/10">
+        <span className="h-2 w-2 rounded-full bg-emerald-500/40" />
+        No mood detected
       </div>
     );
   }
@@ -26,8 +26,8 @@ export function MoodWidget({ mood, severity }: MoodWidgetProps) {
       key={`${mood}-${severity}`}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="glass flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium"
-      style={{ background: bg, color }}
+      className="glass flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold border shadow-xs"
+      style={{ background: bg, color, borderColor: `${color}40` }}
     >
       <span className="relative flex h-2 w-2">
         <span
@@ -36,8 +36,8 @@ export function MoodWidget({ mood, severity }: MoodWidgetProps) {
         />
         <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: color }} />
       </span>
-      <span className="capitalize">{mood}</span>
-      <span className="opacity-70">· {severityLabel(severity)} ({severity}/10)</span>
+      <span className="capitalize font-bold">{mood}</span>
+      <span className="opacity-80">({severity}/10 · {severityLabel(severity)})</span>
     </motion.div>
   );
 }
