@@ -5,6 +5,7 @@ import {
   Award,
   BarChart3,
   BookHeart,
+  BrainCircuit,
   FileText,
   Headphones,
   Leaf,
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { BreathingExercise } from "@/components/BreathingExercise";
+import { CBTReframer } from "@/components/CBTReframer";
 import { ChatInterface } from "@/components/ChatInterface";
 import { CrisisToolkitModal } from "@/components/CrisisToolkitModal";
 import { JournalMode } from "@/components/JournalMode";
@@ -26,11 +28,12 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { WellnessQuests } from "@/components/WellnessQuests";
 import { WellnessReportModal } from "@/components/WellnessReportModal";
 
-type View = "chat" | "journal" | "soundscapes" | "quests" | "trends" | "breathe";
+type View = "chat" | "journal" | "cbt" | "soundscapes" | "quests" | "trends" | "breathe";
 
 const NAV_ITEMS: { id: View; label: string; icon: typeof MessageCircle }[] = [
   { id: "chat", label: "Chat Sanctuary", icon: MessageCircle },
   { id: "journal", label: "Journal & Reflections", icon: BookHeart },
+  { id: "cbt", label: "CBT Reframer", icon: BrainCircuit },
   { id: "soundscapes", label: "Soundscapes", icon: Headphones },
   { id: "quests", label: "Daily Quests", icon: Award },
   { id: "trends", label: "Mood Trends", icon: BarChart3 },
@@ -174,6 +177,7 @@ export default function Home() {
             {view === "journal" && (
               <JournalMode onMoodUpdate={handleMoodUpdate} />
             )}
+            {view === "cbt" && <CBTReframer />}
             {view === "soundscapes" && <Soundscapes />}
             {view === "quests" && <WellnessQuests />}
             {view === "trends" && <MoodTrendDashboard />}
