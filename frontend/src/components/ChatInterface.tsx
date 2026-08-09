@@ -12,16 +12,33 @@ import {
   User,
   AlertTriangle,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { clearChatMemory, streamChat } from "@/lib/api";
 import { addMoodRecord } from "@/lib/moodHistory";
 import { ActionPlan } from "@/components/ActionPlan";
 import { CrisisBanner } from "@/components/CrisisBanner";
 
+const emptySubscribe = () => () => {};
+
+function useSpeechSupported(): boolean {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => {
+      const win = window as unknown as {
+        SpeechRecognition?: unknown;
+        webkitSpeechRecognition?: unknown;
+      };
+      return Boolean(win.SpeechRecognition || win.webkitSpeechRecognition);
+    },
+    () => false
+  );
+}
+
 interface SpeechRecognitionEvent {
   resultIndex: number;
   results: {
     [index: number]: {
+      isFinal: boolean;
       [index: number]: {
         transcript: string;
       };
@@ -75,53 +92,45 @@ export function ChatInterface({
   const [isStreaming, setIsStreaming] = useState(false);
   const [crisisActive, setCrisisActive] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [speechSupported] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    const win = window as unknown as {
-      SpeechRecognition?: unknown;
-      webkitSpeechRecognition?: unknown;
-    };
-    return Boolean(win.SpeechRecognition || win.webkitSpeechRecognition);
-  });
+  const speechSupported = useSpeechSupported();
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Initialize Speech Recognition if supported
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const win = window as unknown as {
-        SpeechRecognition?: new () => SpeechRecognition;
-        webkitSpeechRecognition?: new () => SpeechRecognition;
+    if (!speechSupported) return;
+    const win = window as unknown as {
+      SpeechRecognition?: new () => SpeechRecognition;
+      webkitSpeechRecognition?: new () => SpeechRecognition;
+    };
+    const SpeechRecognitionClass = win.SpeechRecognition || win.webkitSpeechRecognition;
+    if (SpeechRecognitionClass) {
+      const recognition = new SpeechRecognitionClass();
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        let finalTranscript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          }
+        }
+        const addition = finalTranscript.trim();
+        if (addition) {
+          setInput((prev) => {
+            const trimmed = prev.trim();
+            return trimmed ? `${trimmed} ${addition}` : addition;
+          });
+        }
       };
-      const SpeechRecognitionClass = win.SpeechRecognition || win.webkitSpeechRecognition;
-      if (SpeechRecognitionClass) {
-        const recognition = new SpeechRecognitionClass();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.lang = "en-US";
 
-        recognition.onresult = (event: SpeechRecognitionEvent) => {
-          let transcript = "";
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            transcript += event.results[i][0].transcript;
-          }
-          if (transcript) {
-            setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
-          }
-        };
-
-        recognition.onerror = () => {
-          setIsListening(false);
-        };
-
-        recognition.onend = () => {
-          setIsListening(false);
-        };
-
-        recognitionRef.current = recognition;
-      }
+      recognition.onerror = () => setIsListening(false);
+      recognition.onend = () => setIsListening(false);
+      recognitionRef.current = recognition;
     }
-  }, []);
+  }, [speechSupported]);
 
   const toggleListening = () => {
     if (!recognitionRef.current) return;

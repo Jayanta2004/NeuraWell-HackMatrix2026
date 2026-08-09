@@ -8,6 +8,9 @@ export interface MoodRecord {
   isEmergency: boolean;
   source: MoodSource;
   text?: string;
+  tags?: string[];
+  energy?: number;
+  title?: string;
 }
 
 const STORAGE_KEY = "neurawell:mood-history";
@@ -47,6 +50,11 @@ export function addMoodRecord(record: Omit<MoodRecord, "id" | "timestamp">): Moo
   return full;
 }
 
+export function deleteMoodRecord(id: string): void {
+  const all = readAll().filter((r) => r.id !== id);
+  writeAll(all);
+}
+
 export function clearMoodHistory(): void {
   writeAll([]);
 }
@@ -58,6 +66,43 @@ export function getJournalEntries(): MoodRecord[] {
 export function getLatestMood(): MoodRecord | null {
   const all = getMoodHistory();
   return all.length ? all[all.length - 1] : null;
+}
+
+export function getJournalStreak(): number {
+  const journalEntries = getJournalEntries();
+  if (journalEntries.length === 0) return 0;
+
+  const dates = Array.from(
+    new Set(journalEntries.map((e) => new Date(e.timestamp).toISOString().slice(0, 10)))
+  ).sort((a, b) => b.localeCompare(a));
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+  // Check if user journaled today or yesterday to maintain active streak
+  if (dates[0] !== todayStr && dates[0] !== yesterdayStr) {
+    return 0;
+  }
+
+  let streak = 0;
+  let currentDate = new Date(dates[0]);
+
+  for (const dStr of dates) {
+    const d = new Date(dStr);
+    const diffDays = Math.round(
+      (currentDate.getTime() - d.getTime()) / (1000 * 3600 * 24)
+    );
+    if (diffDays <= 1) {
+      streak += 1;
+      currentDate = d;
+    } else {
+      break;
+    }
+  }
+
+  return streak;
 }
 
 export interface DailyTrendPoint {

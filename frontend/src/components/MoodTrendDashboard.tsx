@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { BarChart3, Trash2, Calendar, Info } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   clearMoodHistory,
   getAverageSeverity,
@@ -26,7 +26,7 @@ export function MoodTrendDashboard() {
   }, [refresh]);
 
   // Generate 14 days array ending today
-  const fourteenDaysData = useMemo(() => {
+  const fourteenDaysData = (() => {
     const rawTrend = getSeverityTrend(14);
     const trendMap = new Map(rawTrend.map((item) => [item.date, item]));
 
@@ -48,9 +48,9 @@ export function MoodTrendDashboard() {
     }
 
     return result;
-  }, [records]);
+  })();
 
-  const avg = useMemo(() => getAverageSeverity(), [records]);
+  const avg = getAverageSeverity();
 
   return (
     <div className="flex flex-col gap-5">
