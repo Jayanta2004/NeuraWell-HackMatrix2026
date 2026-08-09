@@ -40,8 +40,12 @@ def clear_memory(session_id: str = "default") -> None:
 
 # ---------- LLM Clients ----------
 
-emotion_llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0).with_structured_output(EmotionAnalysisOutput)
-planner_llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.3).with_structured_output(GroundingPlanOutput)
+emotion_llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0).with_structured_output(
+    EmotionAnalysisOutput, method="function_calling"
+)
+planner_llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.3).with_structured_output(
+    GroundingPlanOutput, method="function_calling"
+)
 intervention_llm = ChatOpenAI(model="gpt-4o", temperature=0.7, streaming=True)
 
 CRISIS_MESSAGE = (

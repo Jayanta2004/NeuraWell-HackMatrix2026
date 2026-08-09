@@ -1,3 +1,4 @@
+import os
 import asyncio
 
 from flask import Flask, Response, jsonify, request, stream_with_context
@@ -7,6 +8,12 @@ from agent_core import analyze_emotion, clear_memory, process_chat_stream
 
 app = Flask(__name__)
 CORS(app)
+
+
+@app.route("/", methods=["GET", "HEAD"])
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "healthy", "service": "NeuraWell API"}), 200
 
 
 def _run_async(coro):
@@ -76,4 +83,5 @@ def clear():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000, threaded=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
