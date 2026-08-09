@@ -2,29 +2,39 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import {
+  Award,
   BarChart3,
   BookHeart,
+  FileText,
+  Headphones,
   Leaf,
   Menu,
   MessageCircle,
+  ShieldAlert,
   Wind,
   X,
 } from "lucide-react";
 import { useState } from "react";
 import { BreathingExercise } from "@/components/BreathingExercise";
 import { ChatInterface } from "@/components/ChatInterface";
+import { CrisisToolkitModal } from "@/components/CrisisToolkitModal";
 import { JournalMode } from "@/components/JournalMode";
 import { MoodTrendDashboard } from "@/components/MoodTrendDashboard";
 import { MoodWidget } from "@/components/MoodWidget";
+import { Soundscapes } from "@/components/Soundscapes";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { WellnessQuests } from "@/components/WellnessQuests";
+import { WellnessReportModal } from "@/components/WellnessReportModal";
 
-type View = "chat" | "journal" | "trends" | "breathe";
+type View = "chat" | "journal" | "soundscapes" | "quests" | "trends" | "breathe";
 
 const NAV_ITEMS: { id: View; label: string; icon: typeof MessageCircle }[] = [
-  { id: "chat", label: "Chat", icon: MessageCircle },
-  { id: "journal", label: "Journal", icon: BookHeart },
-  { id: "trends", label: "Mood trends", icon: BarChart3 },
-  { id: "breathe", label: "Breathe", icon: Wind },
+  { id: "chat", label: "Chat Sanctuary", icon: MessageCircle },
+  { id: "journal", label: "Journal & Reflections", icon: BookHeart },
+  { id: "soundscapes", label: "Soundscapes", icon: Headphones },
+  { id: "quests", label: "Daily Quests", icon: Award },
+  { id: "trends", label: "Mood Trends", icon: BarChart3 },
+  { id: "breathe", label: "Breathing Sanctuary", icon: Wind },
 ];
 
 export default function Home() {
@@ -32,6 +42,10 @@ export default function Home() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mood, setMood] = useState<string | null>(null);
   const [severity, setSeverity] = useState<number | null>(null);
+
+  // Modals state
+  const [sosModalOpen, setSosModalOpen] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
 
   const handleMoodUpdate = (m: string, s: number) => {
     setMood(m);
@@ -46,11 +60,16 @@ export default function Home() {
   return (
     <div className="flex h-screen w-full overflow-hidden">
       {/* Desktop sidebar */}
-      <aside className="glass hidden w-64 shrink-0 flex-col gap-1 p-4 md:flex">
+      <aside className="glass hidden w-64 shrink-0 flex-col gap-1 p-4 md:flex border-r border-emerald-500/10">
         <Logo />
-        <nav className="mt-6 flex flex-col gap-1">
+        <nav className="mt-6 flex flex-col gap-1.5">
           {NAV_ITEMS.map((item) => (
-            <NavButton key={item.id} item={item} active={view === item.id} onClick={() => navigate(item.id)} />
+            <NavButton
+              key={item.id}
+              item={item}
+              active={view === item.id}
+              onClick={() => navigate(item.id)}
+            />
           ))}
         </nav>
       </aside>
@@ -64,7 +83,7 @@ export default function Home() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setDrawerOpen(false)}
-              className="fixed inset-0 z-40 bg-black/40 md:hidden"
+              className="fixed inset-0 z-40 bg-black/50 md:hidden backdrop-blur-xs"
             />
             <motion.aside
               initial={{ x: -280 }}
@@ -75,13 +94,22 @@ export default function Home() {
             >
               <div className="flex items-center justify-between">
                 <Logo />
-                <button onClick={() => setDrawerOpen(false)} aria-label="Close menu">
+                <button
+                  onClick={() => setDrawerOpen(false)}
+                  aria-label="Close menu"
+                  className="rounded-full p-1 hover:bg-black/10 dark:hover:bg-white/10"
+                >
                   <X size={18} />
                 </button>
               </div>
-              <nav className="mt-6 flex flex-col gap-1">
+              <nav className="mt-6 flex flex-col gap-1.5">
                 {NAV_ITEMS.map((item) => (
-                  <NavButton key={item.id} item={item} active={view === item.id} onClick={() => navigate(item.id)} />
+                  <NavButton
+                    key={item.id}
+                    item={item}
+                    active={view === item.id}
+                    onClick={() => navigate(item.id)}
+                  />
                 ))}
               </nav>
             </motion.aside>
@@ -90,7 +118,8 @@ export default function Home() {
       </AnimatePresence>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="glass flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        {/* Top Navigation Header */}
+        <header className="glass flex items-center justify-between gap-3 px-4 py-3 sm:px-6 border-b border-emerald-500/10">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setDrawerOpen(true)}
@@ -99,16 +128,40 @@ export default function Home() {
             >
               <Menu size={18} />
             </button>
-            <span className="text-sm font-semibold capitalize sm:text-base">
+            <span className="text-sm font-bold capitalize sm:text-base text-foreground">
               {NAV_ITEMS.find((n) => n.id === view)?.label}
             </span>
           </div>
-          <div className="flex items-center gap-3">
+
+          <div className="flex items-center gap-2.5">
+            {/* Header Action: SOS Safety Toolkit Button */}
+            <button
+              type="button"
+              onClick={() => setSosModalOpen(true)}
+              title="SOS Emergency Safety Toolkit"
+              className="flex items-center gap-1.5 rounded-full bg-red-500/15 px-3 py-1.5 text-xs font-bold text-red-500 hover:bg-red-500/25 transition-all"
+            >
+              <ShieldAlert size={15} />
+              <span className="hidden sm:inline">SOS Safety</span>
+            </button>
+
+            {/* Header Action: Wellness Report Button */}
+            <button
+              type="button"
+              onClick={() => setReportModalOpen(true)}
+              title="Generate Therapist Wellness Report"
+              className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/25 transition-all"
+            >
+              <FileText size={15} />
+              <span className="hidden sm:inline">Report</span>
+            </button>
+
             <MoodWidget mood={mood} severity={severity} />
             <ThemeToggle />
           </div>
         </header>
 
+        {/* Main Content Area */}
         <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="mx-auto h-full max-w-3xl">
             {view === "chat" && (
@@ -121,6 +174,8 @@ export default function Home() {
             {view === "journal" && (
               <JournalMode onMoodUpdate={handleMoodUpdate} />
             )}
+            {view === "soundscapes" && <Soundscapes />}
+            {view === "quests" && <WellnessQuests />}
             {view === "trends" && <MoodTrendDashboard />}
             {view === "breathe" && (
               <div className="flex h-full items-center justify-center">
@@ -130,6 +185,19 @@ export default function Home() {
           </div>
         </main>
       </div>
+
+      {/* SOS Safety Toolkit Modal */}
+      <CrisisToolkitModal
+        isOpen={sosModalOpen}
+        onClose={() => setSosModalOpen(false)}
+        onNavigateBreathe={() => navigate("breathe")}
+      />
+
+      {/* Therapist Wellness Report Modal */}
+      <WellnessReportModal
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+      />
     </div>
   );
 }
@@ -137,13 +205,15 @@ export default function Home() {
 function Logo() {
   return (
     <div className="flex items-center gap-2 px-2 py-1">
-      <div
-        className="flex h-8 w-8 items-center justify-center rounded-full"
-        style={{ background: "var(--primary)" }}
-      >
-        <Leaf size={16} className="text-primary-foreground" />
+      <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-emerald-600 dark:bg-emerald-400 text-white dark:text-emerald-950 shadow-md">
+        <Leaf size={18} />
       </div>
-      <span className="text-base font-semibold tracking-tight">NeuraWell</span>
+      <div className="flex flex-col">
+        <span className="text-base font-extrabold tracking-tight text-foreground">NeuraWell</span>
+        <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 -mt-1">
+          AI Mental Sanctuary
+        </span>
+      </div>
     </div>
   );
 }
@@ -162,12 +232,13 @@ function NavButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-        active ? "text-primary-foreground" : "text-foreground hover:bg-black/5 dark:hover:bg-white/5"
+      className={`flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold transition-all ${
+        active
+          ? "bg-emerald-600 text-white dark:bg-emerald-400 dark:text-emerald-950 shadow-md"
+          : "text-foreground hover:bg-emerald-500/10"
       }`}
-      style={active ? { background: "var(--primary)" } : undefined}
     >
-      <Icon size={17} />
+      <Icon size={18} />
       {item.label}
     </button>
   );
